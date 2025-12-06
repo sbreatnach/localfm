@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 import pprint
@@ -100,7 +99,11 @@ class Command(BaseCommand):
             artist = track.get_artist()
             album = track.get_album()
             timestamp = int(played_track.timestamp) if played_track.timestamp else None
-            occurred_on = datetime.fromtimestamp(timestamp).replace(tzinfo=UTC) if timestamp else None
+            occurred_on = (
+                datetime.fromtimestamp(timestamp).replace(tzinfo=UTC)
+                if timestamp
+                else None
+            )
             with transaction.atomic():
                 persisted_track = Track.get_or_create_by_identifier(
                     track_name=track.get_title(),

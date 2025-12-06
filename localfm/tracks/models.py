@@ -52,7 +52,9 @@ class Album(models.Model):
         album_identifier = cls.generate_identifier(album_name, **album_data)
         persisted_album = cls.objects.filter(hashed_identifier=album_identifier).first()
         if not persisted_album:
-            persisted_artist = artist or Artist.get_or_create_by_identifier(**album_data)
+            persisted_artist = artist or Artist.get_or_create_by_identifier(
+                **album_data
+            )
             persisted_album = cls.objects.create(
                 name=album_name,
                 artist=persisted_artist,
