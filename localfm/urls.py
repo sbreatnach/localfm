@@ -22,6 +22,6 @@ from .app import api
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("/2.0/", include("bridge.urls")),
+    path("/2.0/", include("localfm.bridge.urls")),
     path("/api/", api.urls),
 ]

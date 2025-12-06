@@ -1,0 +1,19 @@
+(common) {
+	log
+	encode zstd gzip
+	header -Server
+	# debug
+}
+
+app.localfm.localhost {
+	import common
+
+	handle_path /static/* {
+		root * {$APP_STATIC_FILES_PATH}
+		file_server
+	}
+
+	handle {
+		reverse_proxy localhost:8001
+	}
+}

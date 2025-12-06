@@ -5,14 +5,13 @@ from django.http import (
     HttpResponseNotFound,
 )
 
+from localfm.access import views as sessions_views
 from localfm.tracks import views as tracks_views
-from localfm.sessions import views as sessions_views
-
 
 SUPPORTED_ENDPOINTS = {
     "track.updateNowPlaying": tracks_views.update_now_playing,
     "track.scrobble": tracks_views.scrobble,
-    "auth.getMobileSession": sessions_views.get_mobile_session,
+    "access.getMobileSession": sessions_views.get_mobile_session,
 }
 
 

@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "localfm.bridge",
-    "localfm.sessions",
+    "localfm.access",
     "localfm.tracks",
 ]
 
@@ -64,7 +64,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
+                "django.contrib.access.context_processors.access",
                 "django.contrib.messages.context_processors.messages",
             ],
         },
@@ -79,14 +79,18 @@ WSGI_APPLICATION = "localfm.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": environ.get("LOCALFM_DB_HOST", "localhost"),
+        "PORT": environ.get("LOCALFM_DB_PORT", "5432"),
+        "NAME": environ.get("LOCALFM_DB_NAME", "localfm"),
+        "USER": environ.get("LOCALFM_DB_USER", "localfm"),
+        "PASSWORD": environ.get("LOCALFM_DB_PASSWORD", ""),
     }
 }
 
 AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-    "localfm.sessions.auth_backend.ApiKeyBackend",
+    "django.contrib.access.backends.ModelBackend",
+    "localfm.access.auth_backend.ApiKeyBackend",
 ]
 
 # Password validation
@@ -94,16 +98,16 @@ AUTHENTICATION_BACKENDS = [
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.access.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": "django.contrib.access.password_validation.MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": "django.contrib.access.password_validation.CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": "django.contrib.access.password_validation.NumericPasswordValidator",
     },
 ]
 

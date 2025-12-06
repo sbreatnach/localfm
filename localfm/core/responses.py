@@ -1,4 +1,5 @@
 from io import StringIO
+
 from django.utils.encoding import force_str
 from django.utils.xmlutils import SimplerXMLGenerator
 from ninja.renderers import BaseRenderer

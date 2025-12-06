@@ -1,0 +1,17 @@
+procs:
+  postgres:
+    cmd: ["d:/scoop/apps/postgresql/current/bin/postgres.exe", "-D", "d:/scoop/persist/postgresql/18.1/data"]
+  postgres_init:
+    cmd: ["d:/scoop/apps/postgresql/current/bin/psql.exe", "-U", "deesn", "-f", "./deployment/local/db-init.sql", "postgres"]
+    autostart: false
+  caddy:
+    cmd: ["caddy", "run", "--config", "./deployment/local/Caddyfile"]
+    autostart: false
+  nats:
+    cmd: ["nats-server.exe", "-c", "./deployment/local/jetstream.conf"]
+    autostart: false
+  localfm:
+    cmd: ["uv.exe", "run", "python", "-m", "manage", "runserver", "8001"]
+  localfm_migrate:
+    cmd: ["uv.exe", "run", "python", "-m", "manage", "migrate"]
+    autostart: false
