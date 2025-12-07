@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
-            "--log-level", default="INFO", help="Start of the export date range"
+            "--log-level", default="INFO", help="Log level for the script"
         )
         parser.add_argument("--start-datetime", help="Start of the export date range")
         parser.add_argument("--end-datetime", help="End of the export date range")
@@ -104,12 +104,15 @@ class Command(BaseCommand):
                 if timestamp
                 else None
             )
+            persisted_track = Track.get_by_identifier(
+                track_name=track.get_title(),
+                artist_name=artist.get_name() if artist else None,
+                album_name=album.get_name() if album else None,
+            )
+            if persisted_track is None:
+                logger.warning("Unable to find track: %s", played_track)
+                continue
             with transaction.atomic():
-                persisted_track = Track.get_or_create_by_identifier(
-                    track_name=track.get_title(),
-                    artist_name=artist.get_name() if artist else None,
-                    album_name=album.get_name() if album else None,
-                )
                 persisted_track.play_count += 1
                 persisted_track.save()
                 TrackPlay.objects.create(
