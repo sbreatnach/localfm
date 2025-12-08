@@ -81,7 +81,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "HOST": environ.get("LOCALFM_DB_HOST", "localhost"),
-        "PORT": environ.get("LOCALFM_DB_PORT", "5432"),
+        "PORT": environ.get("LOCALFM_DB_PORT", "5532"),
         "NAME": environ.get("LOCALFM_DB_NAME", "localfm"),
         "USER": environ.get("LOCALFM_DB_USER", "localfm"),
         "PASSWORD": environ.get("LOCALFM_DB_PASSWORD", ""),
