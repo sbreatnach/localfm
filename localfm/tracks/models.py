@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 def generate_identifier(*args):
     hasher = hashlib.md5(usedforsecurity=False)
     for arg in args:
-        hasher.update(str(arg).encode())
+        # force all text to lower-case (if applicable to the language)
+        # since Last.fm has a weird way of not retaining capitalisation correctly
+        hasher.update(str(arg).lower().encode())
     return hasher.hexdigest()
 
 
@@ -103,6 +105,7 @@ class Track(models.Model):
     @classmethod
     def get_by_identifier(cls, track_name=None, **track_data):
         track_identifier = cls.generate_identifier(track_name, **track_data)
+        logger.debug("Retrieving track with identifier %s", track_identifier)
         return cls.objects.filter(hashed_identifier=track_identifier).first()
 
     @classmethod

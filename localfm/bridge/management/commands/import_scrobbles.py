@@ -97,18 +97,23 @@ class Command(BaseCommand):
         for played_track in track_data:
             track = played_track.track
             artist = track.get_artist()
-            album = track.get_album()
+            album_name = played_track.album
+            if album_name is None:
+                album = track.get_album()
+                album_name = album.get_name() if album else None
+            identifier_args = dict(
+                track_name=track.get_title(),
+                artist_name=artist.get_name() if artist else None,
+                album_name=album_name,
+            )
             timestamp = int(played_track.timestamp) if played_track.timestamp else None
             occurred_on = (
                 datetime.fromtimestamp(timestamp).replace(tzinfo=UTC)
                 if timestamp
                 else None
             )
-            persisted_track = Track.get_by_identifier(
-                track_name=track.get_title(),
-                artist_name=artist.get_name() if artist else None,
-                album_name=album.get_name() if album else None,
-            )
+            logger.debug("Importing track with args %s played at %s", identifier_args, occurred_on)
+            persisted_track = Track.get_by_identifier(**identifier_args)
             if persisted_track is None:
                 logger.warning("Unable to find track: %s", played_track)
                 continue
