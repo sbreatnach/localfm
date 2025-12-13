@@ -1,18 +1,63 @@
 import logging
 import os
 import pprint
+import random
 import sys
+import time
 from datetime import UTC, datetime, timedelta
 
 import pylast
 from dateutil.parser import parse as date_parse
 from django.core.management import BaseCommand
 from django.db import transaction
-from pylast import PlayedTrack
+from pylast import PlayedTrack, User
 
 from localfm.tracks.models import Track, TrackPlay
 
 logger = logging.getLogger(__name__)
+
+
+def import_scrobbles(user: User, start_datetime, end_datetime):
+    logger.info("Importing scrobbles for range %s to %s", start_datetime, end_datetime)
+    track_data: list[PlayedTrack] = user.get_recent_tracks(
+        limit=None,
+        time_from=int(start_datetime.timestamp()),
+        time_to=int(end_datetime.timestamp()),
+    )
+    logger.info("Found %d tracks", len(track_data))
+    logger.debug("Track data:\n%s", pprint.pformat(track_data))
+
+    # persist the play count into local DB
+    for played_track in track_data:
+        track = played_track.track
+        artist = track.get_artist()
+        album_name = played_track.album
+        if album_name is None:
+            album = track.get_album()
+            album_name = album.get_name() if album else None
+        identifier_args = dict(
+            track_name=track.get_title(),
+            artist_name=artist.get_name() if artist else None,
+            album_name=album_name,
+        )
+        timestamp = int(played_track.timestamp) if played_track.timestamp else None
+        occurred_on = (
+            datetime.fromtimestamp(timestamp).replace(tzinfo=UTC) if timestamp else None
+        )
+        logger.debug(
+            "Importing track with args %s played at %s", identifier_args, occurred_on
+        )
+        persisted_track = Track.get_by_identifier(**identifier_args)
+        if persisted_track is None:
+            logger.warning("Unable to find track: %s", played_track)
+            continue
+        with transaction.atomic():
+            persisted_track.play_count += 1
+            persisted_track.save()
+            TrackPlay.objects.create(
+                track=persisted_track,
+                occurred_on=occurred_on,
+            )
 
 
 class Command(BaseCommand):
@@ -22,6 +67,18 @@ class Command(BaseCommand):
         )
         parser.add_argument("--start-datetime", help="Start of the export date range")
         parser.add_argument("--end-datetime", help="End of the export date range")
+        parser.add_argument(
+            "--hour-delta",
+            help="Number of hours between each chunk imported",
+            default=24,
+            type=int,
+        )
+        parser.add_argument(
+            "--chunk-jitter",
+            help="Number of approximate seconds between each chunk import",
+            default=60,
+            type=int,
+        )
         parser.add_argument(
             "--lastfm-api-key",
             default=os.environ.get("LASTFM_API_KEY"),
@@ -51,6 +108,8 @@ class Command(BaseCommand):
         lastfm_password=None,
         start_datetime=None,
         end_datetime=None,
+        hour_delta=24,
+        chunk_jitter=60,
         log_level=logging.INFO,
         *args,
         **options,
@@ -85,42 +144,22 @@ class Command(BaseCommand):
             password_hash=pylast.md5(lastfm_password),
         )
         user = network.get_authenticated_user()
-        track_data: list[PlayedTrack] = user.get_recent_tracks(
-            limit=None,
-            time_from=int(start_datetime.timestamp()),
-            time_to=int(end_datetime.timestamp()),
-        )
-        logger.info("Found %d tracks", len(track_data))
-        logger.debug("Track data:\n%s", pprint.pformat(track_data))
 
-        # persist the play count into local DB
-        for played_track in track_data:
-            track = played_track.track
-            artist = track.get_artist()
-            album_name = played_track.album
-            if album_name is None:
-                album = track.get_album()
-                album_name = album.get_name() if album else None
-            identifier_args = dict(
-                track_name=track.get_title(),
-                artist_name=artist.get_name() if artist else None,
-                album_name=album_name,
-            )
-            timestamp = int(played_track.timestamp) if played_track.timestamp else None
-            occurred_on = (
-                datetime.fromtimestamp(timestamp).replace(tzinfo=UTC)
-                if timestamp
-                else None
-            )
-            logger.debug("Importing track with args %s played at %s", identifier_args, occurred_on)
-            persisted_track = Track.get_by_identifier(**identifier_args)
-            if persisted_track is None:
-                logger.warning("Unable to find track: %s", played_track)
-                continue
-            with transaction.atomic():
-                persisted_track.play_count += 1
-                persisted_track.save()
-                TrackPlay.objects.create(
-                    track=persisted_track,
-                    occurred_on=occurred_on,
+        # chunk the date range so we don't attempt to import too large a track listing;
+        # we're not going to support parallel requests because that could fall
+        # foul of rate limiting
+        chunk_delta = timedelta(hours=hour_delta)
+        while start_datetime < end_datetime:
+            next_end_datetime = start_datetime + chunk_delta
+            if next_end_datetime >= end_datetime:
+                next_end_datetime = end_datetime
+
+            import_scrobbles(user, start_datetime, next_end_datetime)
+
+            start_datetime = next_end_datetime
+            if chunk_jitter > 0:
+                wait_period = random.randint(
+                    chunk_jitter // 5, chunk_jitter + chunk_jitter // 5
                 )
+                logger.info("Waiting %s seconds before next request", wait_period)
+                time.sleep(wait_period)

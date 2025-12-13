@@ -1,6 +1,8 @@
 """
 Imports the entire music library into the tracks DB
 """
+import time
+from concurrent.futures import ThreadPoolExecutor
 import logging
 import os
 from pathlib import Path
@@ -19,13 +21,21 @@ class Command(BaseCommand):
             "library_directory", help="Directory defining the music library to import"
         )
         parser.add_argument(
-            "--log-level", default="INFO", help="Start of the export date range"
+            "--log-level", default="INFO", help="Log level for the script"
+        )
+        parser.add_argument(
+            "--parallel-workers", type=int, default=5, help="Number of parallel processes for importing"
+        )
+        parser.add_argument(
+            "--name-filter", help="Filter to specific directories by name"
         )
 
     def handle(
         self,
         library_directory,
         log_level=logging.INFO,
+        parallel_workers=5,
+        name_filter=None,
         *args,
         **options,
     ):
@@ -33,13 +43,22 @@ class Command(BaseCommand):
 
         root_dir = Path(library_directory)
         base_directories = [
-            directory for directory in root_dir.iterdir() if directory.is_dir()
+            directory for directory in root_dir.iterdir() if directory.is_dir() and is_filtered(directory.name, name_filter=name_filter)
         ]
-        for base_directory in base_directories:
-            import_from_directory(base_directory)
+        start_time = time.time()
+        with ThreadPoolExecutor(max_workers=parallel_workers) as executor:
+            _results = [result for result in executor.map(import_from_directory, base_directories)]
+        logger.info(f"Imported tracks in %s seconds", time.time() - start_time)
+
+
+def is_filtered(name, name_filter=None):
+    if name_filter:
+        return name_filter in name
+    return name
 
 
 def import_from_directory(base_directory):
+    logger.debug("Importing from directory: %s", base_directory)
     for current_root, dirs, files in base_directory.walk():
         for name in files:
             file_path = current_root / name
@@ -47,6 +66,6 @@ def import_from_directory(base_directory):
             if file_extension in TinyTag.SUPPORTED_FILE_EXTENSIONS:
                 tagged_data = TinyTag.get(file_path)
                 try:
-                    Track.get_or_create_by_tagged_data(tagged_data)
+                    Track.get_or_create_by_tagged_data(file_path, tagged_data)
                 except Exception as exc:
                     logger.error("Failed to import file %s: %s", file_path, str(exc))

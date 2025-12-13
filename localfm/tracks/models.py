@@ -1,10 +1,16 @@
 import hashlib
 import logging
+import os
+from pathlib import Path
 
 from django.db import models
 from tinytag import TinyTag
 
 logger = logging.getLogger(__name__)
+
+
+def library_directory():
+    return os.environ.get("LIBRARY_DIRECTORY", "e:/Music")
 
 
 def generate_identifier(*args):
@@ -55,7 +61,9 @@ class Album(models.Model):
                 persisted_genre = Genre.objects.get_or_create(name=tagged_data.genre)[0]
             persisted_artist = None
             if tagged_data.artist:
-                persisted_artist = Artist.objects.get_or_create(name=tagged_data.artist)[0]
+                persisted_artist = Artist.objects.get_or_create(
+                    name=tagged_data.artist
+                )[0]
             persisted_album_artist = None
             if tagged_data.albumartist:
                 persisted_album_artist = AlbumArtist.objects.get_or_create(
@@ -99,6 +107,7 @@ class Track(models.Model):
     )
     track_number = models.PositiveIntegerField(null=True)
     name = models.CharField(max_length=2048)
+    file_path = models.FilePathField(path=library_directory, max_length=2048)
     play_count = models.PositiveIntegerField(default=0)
     hashed_identifier = models.CharField(max_length=64, unique=True)
 
@@ -109,7 +118,7 @@ class Track(models.Model):
         return cls.objects.filter(hashed_identifier=track_identifier).first()
 
     @classmethod
-    def get_or_create_by_tagged_data(cls, tagged_data: TinyTag):
+    def get_or_create_by_tagged_data(cls, file_path: Path, tagged_data: TinyTag):
         track_identifier = cls.generate_identifier(
             track_name=tagged_data.title,
             artist_name=tagged_data.artist,
@@ -119,15 +128,20 @@ class Track(models.Model):
         if not persisted_track:
             persisted_artist = None
             if tagged_data.artist:
-                persisted_artist = Artist.objects.get_or_create(name=tagged_data.artist)[0]
+                persisted_artist = Artist.objects.get_or_create(
+                    name=tagged_data.artist
+                )[0]
             else:
-                logger.warning("Failed to generate artist name for track %s", tagged_data)
+                logger.warning(
+                    "Failed to generate artist name for track %s", tagged_data
+                )
             persisted_album = Album.get_or_create_by_tagged_data(tagged_data)
             persisted_track = cls.objects.create(
                 name=tagged_data.title,
                 track_number=tagged_data.track,
                 artist=persisted_artist,
                 album=persisted_album,
+                file_path=file_path,
                 hashed_identifier=track_identifier,
             )
         return persisted_track
