@@ -1,0 +1,13 @@
+<html>
+<head>
+    <title>My tracks</title>
+</head>
+<body>
+<ul>
+    <h1>Most recent track plays</h1>
+    {% for track_play in track_plays %}
+        <li>{{ track_play.track.artist.name }} {{ track_play.track.album.name }} {{ track_play.track.name }} - {{ track_play.occurred_on }}</li>
+    {% endfor %}
+</ul>
+</body>
+</html>

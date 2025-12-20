@@ -18,10 +18,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from .app import api
+from .app import v1_api
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("/2.0/", include("localfm.bridge.urls")),
-    path("/api/", api.urls),
+    path("2.0", include("localfm.bridge.urls")),
+    path("api/v1/", v1_api.urls),
+    path("tracks", include("localfm.tracks.urls")),
 ]

@@ -13,3 +13,7 @@ wheels/
 *.env
 *.log
 *~
+
+# ignore Postgres files
+deployment/local/*.lock
+deployment/local/pgdata

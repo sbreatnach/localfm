@@ -26,18 +26,18 @@ class Artist(models.Model):
     name = models.CharField(max_length=256, unique=True)
 
 
-class AlbumArtist(models.Model):
-    name = models.CharField(max_length=256, unique=True)
-
-
 class Genre(models.Model):
     name = models.CharField(max_length=256, unique=True)
 
 
 class Album(models.Model):
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
-    album_artist = models.ForeignKey(AlbumArtist, on_delete=models.CASCADE, null=True)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE, null=True)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name="albums")
+    album_artist = models.ForeignKey(
+        Artist, on_delete=models.CASCADE, null=True, related_name="artist_albums"
+    )
+    genre = models.ForeignKey(
+        Genre, on_delete=models.CASCADE, null=True, related_name="albums"
+    )
     name = models.CharField(max_length=2048)
     disc_number = models.PositiveIntegerField(null=True)
     hashed_identifier = models.CharField(max_length=64, unique=True)
@@ -66,7 +66,7 @@ class Album(models.Model):
                 )[0]
             persisted_album_artist = None
             if tagged_data.albumartist:
-                persisted_album_artist = AlbumArtist.objects.get_or_create(
+                persisted_album_artist = Artist.objects.get_or_create(
                     name=tagged_data.albumartist
                 )[0]
             persisted_album = cls.objects.create(
@@ -164,11 +164,6 @@ class Track(models.Model):
         return generate_identifier(*valid_args)
 
 
-class AlbumGenre(models.Model):
-    album = models.ForeignKey(Album, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-
-
 class TrackPlay(models.Model):
-    track = models.ForeignKey(Track, on_delete=models.CASCADE)
+    track = models.ForeignKey(Track, on_delete=models.CASCADE, related_name="plays")
     occurred_on = models.DateTimeField()

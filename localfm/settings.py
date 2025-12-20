@@ -25,9 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = environ.get("DJANGO_SECRET_KEY", "dummy-secret-7234587r237238")
 DEBUG = as_bool(environ.get("DJANGO_DEBUG", False))
 
-ALLOWED_HOSTS = [
-    as_csv_list(environ.get("DJANGO_ALLOWED_HOSTS", "localhost")),
-]
+ALLOWED_HOSTS = as_csv_list(environ.get("DJANGO_ALLOWED_HOSTS", "localhost"))
+APPEND_SLASH = False
 
 
 # Application definition
@@ -64,7 +63,6 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
-                "django.contrib.access.context_processors.access",
                 "django.contrib.messages.context_processors.messages",
             ],
         },

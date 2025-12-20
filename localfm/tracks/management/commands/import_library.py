@@ -1,16 +1,17 @@
 """
 Imports the entire music library into the tracks DB
 """
-import time
-from concurrent.futures import ThreadPoolExecutor
+
 import logging
 import os
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from django.core.management import BaseCommand
 from tinytag import TinyTag
 
-from localfm.tracks.models import Track
+from localfm.tracks.models import Track, library_directory
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +19,18 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
-            "library_directory", help="Directory defining the music library to import"
+            "--library-directory",
+            help="Directory defining the music library to import",
+            default=library_directory(),
         )
         parser.add_argument(
             "--log-level", default="INFO", help="Log level for the script"
         )
         parser.add_argument(
-            "--parallel-workers", type=int, default=5, help="Number of parallel processes for importing"
+            "--parallel-workers",
+            type=int,
+            default=2,
+            help="Number of parallel processes for importing",
         )
         parser.add_argument(
             "--name-filter", help="Filter to specific directories by name"
@@ -43,11 +49,17 @@ class Command(BaseCommand):
 
         root_dir = Path(library_directory)
         base_directories = [
-            directory for directory in root_dir.iterdir() if directory.is_dir() and is_filtered(directory.name, name_filter=name_filter)
+            directory
+            for directory in root_dir.iterdir()
+            if directory.is_dir()
+            and is_filtered(directory.name, name_filter=name_filter)
         ]
         start_time = time.time()
         with ThreadPoolExecutor(max_workers=parallel_workers) as executor:
-            _results = [result for result in executor.map(import_from_directory, base_directories)]
+            _results = [
+                result
+                for result in executor.map(import_from_directory, base_directories)
+            ]
         logger.info(f"Imported tracks in %s seconds", time.time() - start_time)
 
 

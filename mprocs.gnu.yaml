@@ -1,7 +1,6 @@
 procs:
   postgres:
-    shell: "/usr/lib/postgresql/17/bin/postgres -p 5532 -k $(pwd)/deployment/local -D ./deployment/local/pgdata"
-    stop: "SIGTERM"
+    shell: "exec /usr/lib/postgresql/17/bin/postgres -p 5532 -k $(pwd)/deployment/local -D ./deployment/local/pgdata"
   caddy:
     cmd: ["caddy", "run", "--config", "./deployment/local/Caddyfile"]
     autostart: false
@@ -9,5 +8,5 @@ procs:
     cmd: ["nats-server", "-c", "./deployment/local/jetstream.conf"]
     autostart: false
   localfm:
-    cmd: ["uv", "run", "python", "-m", "manage", "runserver", "8001"]
+    cmd: ["uv", "run", "python", "-m", "manage", "runserver", "8011"]
     stop: "SIGTERM"

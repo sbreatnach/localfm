@@ -8,4 +8,4 @@ procs:
     cmd: ["nats-server.exe", "-c", "./deployment/local/jetstream.conf"]
     autostart: false
   localfm:
-    cmd: ["uv.exe", "run", "python", "-m", "manage", "runserver", "8001"]
+    cmd: ["uv.exe", "run", "python", "-m", "manage", "runserver", "8011"]
