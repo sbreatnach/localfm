@@ -28,7 +28,17 @@ class TracksIndex(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(TracksIndex, self).get_context_data(**kwargs)
-        context["track_plays"] = TrackPlay.objects.all().select_related("track__album", "track__artist").order_by("-occurred_on")[:30]
+        context["most_played_albums"] = Album.list_with_play_count()
+        context["most_played_tracks"] = (
+            Track.objects.all()
+            .select_related("album", "artist")
+            .order_by("-play_count")[:100]
+        )
+        context["recent_track_plays"] = (
+            TrackPlay.objects.all()
+            .select_related("track__album", "track__artist")
+            .order_by("-occurred_on")[:30]
+        )
         return context
 
 

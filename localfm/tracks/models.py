@@ -43,6 +43,33 @@ class Album(models.Model):
     hashed_identifier = models.CharField(max_length=64, unique=True)
 
     @classmethod
+    def list_with_play_count(cls, limit=30):
+        raw_query = """
+        SELECT albums.*,
+               artists.name as artist_name,
+               (album_listens.total_album_listens /
+                album_totals.total_tracks) as approx_play_count
+        FROM tracks_album albums
+        INNER JOIN tracks_artist artists ON artists.id = albums.album_artist_id
+        INNER JOIN (
+            SELECT albums.id as album_id, count(*) as total_tracks
+            FROM tracks_track tracks
+            INNER JOIN tracks_album albums ON albums.id = tracks.album_id
+            GROUP BY albums.id
+        ) album_totals ON album_totals.album_id = albums.id
+        INNER JOIN (
+            SELECT albums.id as album_id, albums.name, count(*) as total_album_listens
+            FROM tracks_trackplay plays
+            INNER JOIN tracks_track tracks ON tracks.id = plays.track_id
+            INNER JOIN tracks_album albums ON albums.id = tracks.album_id
+            GROUP BY albums.id, albums.name
+        ) album_listens ON album_listens.album_id = albums.id
+        ORDER BY approx_play_count DESC
+        LIMIT %s;
+        """
+        return Album.objects.raw(raw_query, [limit])
+
+    @classmethod
     def get_or_create_by_tagged_data(cls, tagged_data: TinyTag):
         if not tagged_data.album:
             logger.warning("No album data for tagged data %s", tagged_data.filename)

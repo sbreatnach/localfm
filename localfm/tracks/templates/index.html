@@ -3,10 +3,24 @@
     <title>My tracks</title>
 </head>
 <body>
+<h1>Most recent track plays</h1>
 <ul>
-    <h1>Most recent track plays</h1>
-    {% for track_play in track_plays %}
-        <li>{{ track_play.track.artist.name }} {{ track_play.track.album.name }} {{ track_play.track.name }} - {{ track_play.occurred_on }}</li>
+    {% for track_play in recent_track_plays %}
+        <li><b>{{ track_play.track.artist.name }}</b> <i>{{ track_play.track.album.name }}</i> {{ track_play.track.name }} - {{ track_play.occurred_on }}</li>
+    {% endfor %}
+</ul>
+
+<h1>Top played albums</h1>
+<ul>
+    {% for album in most_played_albums %}
+        <li><b>{{ album.artist_name }}</b> <i>{{ album.name }}</i>: {{ album.approx_play_count }}</li>
+    {% endfor %}
+</ul>
+
+<h1>Top played tracks</h1>
+<ul>
+    {% for track in most_played_tracks %}
+        <li><b>{{ track.artist.name }}</b> <i>{{ track.album.name }}</i> {{ track.name }} - {{ track.play_count }}</li>
     {% endfor %}
 </ul>
 </body>

@@ -69,6 +69,8 @@ def load_lastfm_scrobbles(user: User, start_datetime, end_datetime) -> list[Scro
         if album_name is None:
             album = track.get_album()
             album_name = album.get_name() if album else None
+        if album_name == "Untitled Album":
+            album_name = ""
         timestamp = int(played_track.timestamp) if played_track.timestamp else None
         occurred_on = (
             datetime.fromtimestamp(timestamp).replace(tzinfo=UTC) if timestamp else None
@@ -109,7 +111,7 @@ def load_from_lastfm(
     start_datetime = (
         date_parse(start_datetime)
         if start_datetime
-        else (cur_datetime - timedelta(hours=1))
+        else (cur_datetime - timedelta(hours=24))
     )
     end_datetime = date_parse(end_datetime) if end_datetime else cur_datetime
     if end_datetime < start_datetime:
@@ -145,7 +147,9 @@ def load_from_lastfm(
         if next_end_datetime >= end_datetime:
             next_end_datetime = end_datetime
 
-        scrobbles.extend(load_lastfm_scrobbles(user, next_start_datetime, next_end_datetime))
+        scrobbles.extend(
+            load_lastfm_scrobbles(user, next_start_datetime, next_end_datetime)
+        )
 
         next_start_datetime = next_end_datetime
         if chunk_jitter > 0 and next_start_datetime < end_datetime:
@@ -159,12 +163,10 @@ def load_from_lastfm(
 
 
 def save_scrobbles_to_file(file_path, scrobbles):
-    output_file = file_path.format(
-        dated=datetime.now().strftime("%Y%m%dT%H%M%S")
-    )
+    output_file = file_path.format(dated=datetime.now().strftime("%Y%m%dT%H%M%S"))
     with open(output_file, "w", encoding="utf-8") as handle:
         json.dump(
-            scrobbles, handle, cls=ScrobbleEncoder, ensure_ascii=False, indent='\t'
+            scrobbles, handle, cls=ScrobbleEncoder, ensure_ascii=False, indent="\t"
         )
 
 
