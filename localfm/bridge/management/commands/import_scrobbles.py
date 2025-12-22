@@ -86,7 +86,7 @@ def load_lastfm_scrobbles(user: User, start_datetime, end_datetime) -> list[Scro
 
 def load_from_file(scrobbles_file, **kwargs) -> list[Scrobble]:
     scrobbles = []
-    with open(scrobbles_file, "r") as handle:
+    with open(scrobbles_file, "r", encoding="utf-8") as handle:
         raw_scrobbles = json.load(handle)
         for raw_scrobble in raw_scrobbles:
             raw_scrobble[3] = datetime.fromisoformat(raw_scrobble[3])
@@ -141,11 +141,11 @@ def load_from_lastfm(
     scrobbles = []
     next_start_datetime = start_datetime
     while next_start_datetime < end_datetime:
-        next_end_datetime = start_datetime + chunk_delta
+        next_end_datetime = next_start_datetime + chunk_delta
         if next_end_datetime >= end_datetime:
             next_end_datetime = end_datetime
 
-        scrobbles.extend(load_lastfm_scrobbles(user, start_datetime, next_end_datetime))
+        scrobbles.extend(load_lastfm_scrobbles(user, next_start_datetime, next_end_datetime))
 
         next_start_datetime = next_end_datetime
         if chunk_jitter > 0 and next_start_datetime < end_datetime:
@@ -158,13 +158,26 @@ def load_from_lastfm(
     return scrobbles
 
 
+def save_scrobbles_to_file(file_path, scrobbles):
+    output_file = file_path.format(
+        dated=datetime.now().strftime("%Y%m%dT%H%M%S")
+    )
+    with open(output_file, "w", encoding="utf-8") as handle:
+        json.dump(
+            scrobbles, handle, cls=ScrobbleEncoder, ensure_ascii=False, indent='\t'
+        )
+
+
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        (
-            parser.add_argument(
-                "source",
-                help="source of the scrobbles to import",
-            ),
+        parser.add_argument(
+            "source",
+            help="source of the scrobbles to import",
+        )
+        parser.add_argument(
+            "target",
+            default="database",
+            help="target where the scrobbles will be saved",
         )
         parser.add_argument(
             "--log-level", default="INFO", help="Log level for the script"
@@ -207,6 +220,7 @@ class Command(BaseCommand):
     def handle(
         self,
         source,
+        target="database",
         log_level=logging.INFO,
         failed_scrobbles_file="failed_scrobbles_{dated}.json",
         *args,
@@ -218,15 +232,12 @@ class Command(BaseCommand):
         else:
             scrobbles = load_from_file(source, **import_kwargs)
 
-        failed_scrobbles = []
-        for scrobble in scrobbles:
-            if not save_scrobble(scrobble):
-                failed_scrobbles.append(scrobble)
-        if failed_scrobbles:
-            output_file = failed_scrobbles_file.format(
-                dated=datetime.now().strftime("%Y%m%dT%H%M%S")
-            )
-            with open(output_file, "w") as handle:
-                json.dump(
-                    failed_scrobbles, handle, cls=ScrobbleEncoder, ensure_ascii=False
-                )
+        if target == "database":
+            failed_scrobbles = []
+            for scrobble in scrobbles:
+                if not save_scrobble(scrobble):
+                    failed_scrobbles.append(scrobble)
+            if failed_scrobbles:
+                save_scrobbles_to_file(failed_scrobbles_file, failed_scrobbles)
+        else:
+            save_scrobbles_to_file(target, scrobbles)
