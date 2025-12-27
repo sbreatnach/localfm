@@ -5,5 +5,5 @@ CUR_DATE=$(date '+%F')
 source $HOME/.profile
 
 pushd ${PROJECT_DIR}
-  just run-command import_scrobbles lastfm scrobbles_${CUR_DATE}.json
+  just run-command import_scrobbles scrobbles_${CUR_DATE}.json database
 popd
