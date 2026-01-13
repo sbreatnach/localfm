@@ -28,6 +28,8 @@ DEBUG = as_bool(environ.get("DJANGO_DEBUG", False))
 ALLOWED_HOSTS = as_csv_list(environ.get("DJANGO_ALLOWED_HOSTS", "localhost"))
 APPEND_SLASH = False
 
+MUSIC_LIBRARY_DIRECTORY = environ.get("LIBRARY_DIRECTORY", "e:/Music")
+
 
 # Application definition
 

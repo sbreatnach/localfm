@@ -8,10 +8,11 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from django.conf import settings
 from django.core.management import BaseCommand
 from tinytag import TinyTag
 
-from localfm.tracks.models import Track, library_directory
+from localfm.tracks.models import Track
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--library-directory",
             help="Directory defining the music library to import",
-            default=library_directory(),
+            default=settings.MUSIC_LIBRARY_DIRECTORY,
         )
         parser.add_argument(
             "--log-level", default="INFO", help="Log level for the script"

@@ -3,6 +3,7 @@ import logging
 import os
 from pathlib import Path
 
+from django.conf import settings
 from django.db import models
 from tinytag import TinyTag
 
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def library_directory():
-    return os.environ.get("LIBRARY_DIRECTORY", "e:/Music")
+    return settings.MUSIC_LIBRARY_DIRECTORY
 
 
 def generate_identifier(*args):
