@@ -3,10 +3,9 @@ import logging
 import threading
 import time
 
-from localfm.core.runtime import register_shutdown_token, run_wsgi_server
+from localfm.core.runtime import register_shutdown_token
 from localfm.tracks.library import listen_for_changes
-
-from .wsgi import application
+from localfm.wsgi import run_wsgi_server
 
 logger = logging.getLogger("localfm.main")
 
@@ -25,7 +24,13 @@ def run_service():
     )
     library_listen_thread.start()
     listen_address = f"{args.host}:{args.port}"
-    wsgi_thread = threading.Thread(target=run_wsgi_server, args=(shutdown_token, application, listen_address,))
+    wsgi_thread = threading.Thread(
+        target=run_wsgi_server,
+        args=(
+            shutdown_token,
+            listen_address,
+        ),
+    )
     wsgi_thread.start()
 
     while wsgi_thread.is_alive() and library_listen_thread.is_alive():
