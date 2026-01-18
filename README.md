@@ -38,3 +38,16 @@ All LastFM credentials need to be injected via env vars beforehand
 ```shell
 just run-command import_scrobbles
 ```
+
+# TODO
+
+Configure systemd service in homelab.
+Make the daily library import use a date range based on last success.
+Send notification (how?) when scrobbles fail to import to DB.
+  Perhaps a section in the web UI?
+Re-import library files on library file change.
+Make the server reload on project file change - SIGHUP support?
+Auto-fix MP3/AAC metadata when import fails
+  Just re-save the metadata
+  Or fork the metadata lib to correctly read the older metadata format
+  Or force a re-save of the entire music library

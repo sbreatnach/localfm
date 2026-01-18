@@ -218,13 +218,17 @@ class Command(BaseCommand):
             default=os.environ.get("LASTFM_PASSWORD"),
             help="Password for Last.fm",
         )
+        parser.add_argument(
+            "--failed-scrobbles-file",
+            default="failed_scrobbles_{dated}.json",
+            help="File for storing failed scrobble imports, if they exist.",
+        )
 
     def handle(
         self,
         source,
         target="database",
         log_level=logging.INFO,
-        failed_scrobbles_file="failed_scrobbles_{dated}.json",
         *args,
         **import_kwargs,
     ):
