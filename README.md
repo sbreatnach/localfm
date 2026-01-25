@@ -21,6 +21,13 @@ sudo apt install postgresql-server
 /usr/lib/postgresql/17/bin/initdb -D ./deployment/local/pgdata -E 'UTF-8' --lc-collate='en_IE.UTF-8' --lc-ctype='en_IE.UTF-8'
 ```
 
+### Podman
+
+```shell
+podman build -t localfm .
+podman run --rm -e LIBRARY_DIRECTORY=/Music -v ${HOME}/Music:/Music -it localfm 
+```
+
 ## Commands
 
 ### Import library
