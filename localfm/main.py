@@ -3,6 +3,9 @@ import logging
 import threading
 import time
 
+from django.core.wsgi import get_wsgi_application
+from django.core import management
+
 from localfm.core.runtime import register_shutdown_token
 from localfm.tracks.library import listen_for_changes
 from localfm.wsgi import run_wsgi_server
@@ -17,8 +20,12 @@ def run_service():
     parser.add_argument("--log-level", default="INFO")
     args = parser.parse_args()
     logging.basicConfig(level=args.log_level)
-    shutdown_token = register_shutdown_token()
 
+    # the app must be created in order to apply the latest migrations immediately
+    application = get_wsgi_application()
+    management.call_command("migrate", no_input=True)
+
+    shutdown_token = register_shutdown_token()
     library_listen_thread = threading.Thread(
         target=listen_for_changes, args=(shutdown_token,)
     )
@@ -27,6 +34,7 @@ def run_service():
     wsgi_thread = threading.Thread(
         target=run_wsgi_server,
         args=(
+            application,
             shutdown_token,
             listen_address,
         ),
