@@ -227,6 +227,7 @@ class Command(BaseCommand):
     def handle(
         self,
         source,
+        failed_scrobbles_file="failed_scrobbles_{dated}.json",
         target="database",
         log_level=logging.INFO,
         *args,
