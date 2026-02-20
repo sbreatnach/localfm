@@ -3,16 +3,14 @@ Imports the entire music library into the tracks DB
 """
 
 import logging
-import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from django.conf import settings
 from django.core.management import BaseCommand
-from tinytag import TinyTag
 
-from localfm.tracks.models import Track
+from localfm.tracks.library import import_file
 
 logger = logging.getLogger(__name__)
 
@@ -75,10 +73,4 @@ def import_from_directory(base_directory):
     for current_root, dirs, files in base_directory.walk():
         for name in files:
             file_path = current_root / name
-            file_extension = os.path.splitext(name)[1]
-            if file_extension in TinyTag.SUPPORTED_FILE_EXTENSIONS:
-                tagged_data = TinyTag.get(file_path)
-                try:
-                    Track.get_or_create_by_tagged_data(file_path, tagged_data)
-                except Exception as exc:
-                    logger.error("Failed to import file %s: %s", file_path, str(exc))
+            import_file(file_path)
