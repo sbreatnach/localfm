@@ -5,10 +5,7 @@ import time
 
 from django.core.wsgi import get_wsgi_application
 from django.core import management
-
-from localfm.core.runtime import register_shutdown_token
-from localfm.tracks.library import listen_for_changes
-from localfm.wsgi import run_wsgi_server
+import django
 
 logger = logging.getLogger("localfm.main")
 
@@ -21,9 +18,16 @@ def run_service():
     args = parser.parse_args()
     logging.basicConfig(level=args.log_level)
 
+    # must be called before importing any models or django will complain
+    django.setup()
+
     # the app must be created in order to apply the latest migrations immediately
     application = get_wsgi_application()
     management.call_command("migrate", no_input=True)
+
+    from localfm.core.runtime import register_shutdown_token
+    from localfm.tracks.library import listen_for_changes
+    from localfm.wsgi import run_wsgi_server
 
     shutdown_token = register_shutdown_token()
     library_listen_thread = threading.Thread(

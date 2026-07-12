@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 def import_file(file_path: str):
     file_extension = os.path.splitext(file_path)[1]
     if file_extension in TinyTag.SUPPORTED_FILE_EXTENSIONS:
+        logger.info("File updated, re-importing %s", file_path)
         tagged_data = TinyTag.get(file_path)
         try:
             Track.get_or_create_by_tagged_data(file_path, tagged_data)

@@ -18,8 +18,9 @@ def generate_identifier(*args):
     hasher = hashlib.md5(usedforsecurity=False)
     for arg in args:
         # force all text to lower-case (if applicable to the language)
-        # since Last.fm has a weird way of not retaining capitalisation correctly
-        hasher.update(str(arg).lower().encode())
+        # since Last.fm has a weird way of not retaining capitalisation correctly;
+        # also strip out any leading or trailing whitespace characters
+        hasher.update(str(arg).strip().lower().encode())
     return hasher.hexdigest()
 
 
@@ -44,7 +45,7 @@ class Album(models.Model):
     hashed_identifier = models.CharField(max_length=64, unique=True)
 
     @classmethod
-    def list_with_play_count(cls, limit=30):
+    def list_with_play_count(cls, limit=100):
         raw_query = """
         SELECT albums.*,
                artists.name as artist_name,
@@ -86,19 +87,19 @@ class Album(models.Model):
         if not persisted_album:
             persisted_genre = None
             if tagged_data.genre:
-                persisted_genre = Genre.objects.get_or_create(name=tagged_data.genre)[0]
+                persisted_genre = Genre.objects.get_or_create(name=tagged_data.genre.strip())[0]
             persisted_artist = None
             if tagged_data.artist:
                 persisted_artist = Artist.objects.get_or_create(
-                    name=tagged_data.artist
+                    name=tagged_data.artist.strip()
                 )[0]
             persisted_album_artist = None
             if tagged_data.albumartist:
                 persisted_album_artist = Artist.objects.get_or_create(
-                    name=tagged_data.albumartist
+                    name=tagged_data.albumartist.strip()
                 )[0]
             persisted_album = cls.objects.create(
-                name=tagged_data.album,
+                name=tagged_data.album.strip(),
                 disc_number=tagged_data.disc,
                 artist=persisted_artist,
                 album_artist=persisted_album_artist,
@@ -157,7 +158,7 @@ class Track(models.Model):
             persisted_artist = None
             if tagged_data.artist:
                 persisted_artist = Artist.objects.get_or_create(
-                    name=tagged_data.artist
+                    name=tagged_data.artist.strip()
                 )[0]
             else:
                 logger.warning(
@@ -165,7 +166,7 @@ class Track(models.Model):
                 )
             persisted_album = Album.get_or_create_by_tagged_data(tagged_data)
             persisted_track = cls.objects.create(
-                name=tagged_data.title,
+                name=tagged_data.title.strip(),
                 track_number=tagged_data.track,
                 artist=persisted_artist,
                 album=persisted_album,

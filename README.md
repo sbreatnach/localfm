@@ -13,7 +13,16 @@ scoop install postgresql
 d:\scoop\apps\postgresql\current\bin\initdb.exe -D D:\scoop\persist\postgresql\18.1\data -E 'UTF-8' --lc-collate='English_Ireland.UTF-8' --lc-ctype='English_Ireland.UTF-8'
 ```
 
-### Linux
+### Fedora Linux
+
+```shell
+sudo dnf install postgresql-server just caddy
+cargo binstall mprocs
+
+/usr/lib/postgresql/17/bin/initdb -D ./deployment/local/pgdata -E 'UTF-8' --lc-collate='en_IE.UTF-8' --lc-ctype='en_IE.UTF-8'
+```
+
+### Debian Linux
 
 ```shell
 sudo apt install postgresql-server
@@ -29,6 +38,13 @@ podman run --rm -e LIBRARY_DIRECTORY=/Music -v ${HOME}/Music:/Music -it localfm
 ```
 
 ## Commands
+
+### Bootstrap
+
+```shell
+just gnu-run-all
+just clean
+```
 
 ### Import library
 
