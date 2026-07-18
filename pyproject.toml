@@ -13,6 +13,7 @@ dependencies = [
     "tinytag>=2.1.2,<3",
     "waitress>=3.0.2,<4",
     "watchdog>=6.0.0,<7",
+    "whitenoise>=6.12.0",
 ]
 
 [dependency-groups]

@@ -20,3 +20,6 @@ deployment/local/pgdata
 
 # ignore downloaded files
 scrobbles/
+
+# ignore temp files
+staticfiles/

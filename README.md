@@ -42,6 +42,7 @@ podman run --rm -e LIBRARY_DIRECTORY=/Music -v ${HOME}/Music:/Music -it localfm
 ### Bootstrap
 
 ```shell
+just run-command collectstatic
 just gnu-run-all
 just clean
 ```
