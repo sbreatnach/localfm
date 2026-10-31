@@ -1,50 +1,56 @@
-{% load static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>My tracks</title>
+
+    <link rel="stylesheet" href="{% url 'styled_tabs' %}">
 </head>
 <body>
-<nav>
-    <a>Most recent track plays</a>
-    <a>Top played albums</a>
-    <a>Top played tracks</a>
-    <a>Failed track imports</a>
-</nav>
-<section>
-    <h1>Most recent track plays</h1>
-    <ul>
-        {% for track_play in recent_track_plays %}
-            <li><b>{{ track_play.track.artist.name }}</b>
-                <i>{{ track_play.track.album.name }}</i> {{ track_play.track.name }} - {{ track_play.occurred_on }}</li>
-        {% endfor %}
-    </ul>
-</section>
 
-<section>
-    <h1>Top played albums</h1>
-    <ul>
-        {% for album in most_played_albums %}
-            <li><b>{{ album.artist_name }}</b> <i>{{ album.name }}</i>: {{ album.approx_play_count }}</li>
-        {% endfor %}
-    </ul>
-</section>
+    <!-- Navigation Section (Sidebar) -->
+    <aside class="navigation">
+        <nav>
+            <ul>
+                <li><a href="#track-plays">Most recent track plays</a></li>
+                <li><a href="#top-albums">Top played albums</a></li>
+                <li><a href="#top-tracks">Top played tracks</a></li>
+            </ul>
+        </nav>
+    </aside>
 
-<section>
-    <h1>Top played tracks</h1>
-    <ul>
-        {% for track in most_played_tracks %}
-            <li><b>{{ track.artist.name }}</b> <i>{{ track.album.name }}</i> {{ track.name }} - {{ track.play_count }}
-            </li>
-        {% endfor %}
-    </ul>
-</section>
-<section>
-    <h1>Failed track imports</h1>
-    <ul>
-        {% for import in failed_imports %}
-            <li><b>{{ import.artist_name }}</b> <i>{{ import.album_name }}</i>: {{ import.track_name }}</li>
-        {% endfor %}
-    </ul>
-</section>
+    <!-- Main Content Section -->
+    <main class="content">
+
+        <section id="track-plays" class="tab-container">
+            <h1>Most recent track plays</h1>
+            <ul>
+                {% for track_play in recent_track_plays %}
+                    <li><b>{{ track_play.track.artist.name }}</b>
+                        <i>{{ track_play.track.album.name }}</i> {{ track_play.track.name }} - {{ track_play.occurred_on }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section id="top-albums">
+            <h1>Top played albums</h1>
+            <ul>
+                {% for album in most_played_albums %}
+                    <li><b>{{ album.artist_name }}</b> <i>{{ album.name }}</i>: {{ album.approx_play_count }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section id="top-tracks">
+            <h1>Top played tracks</h1>
+            <ul>
+                {% for track in most_played_tracks %}
+                    <li><b>{{ track.artist.name }}</b> <i>{{ track.album.name }}</i> {{ track.name }} - {{ track.play_count }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+    </main>
 </body>
 </html>

@@ -23,6 +23,11 @@ def scrobble(request):
     pass
 
 
+class StyledTabsIndex(TemplateView):
+    template_name = "tabs.css"
+    content_type = "text/css"
+
+
 class TracksIndex(TemplateView):
     template_name = "index.html"
 

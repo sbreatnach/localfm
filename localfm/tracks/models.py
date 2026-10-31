@@ -117,6 +117,8 @@ class Album(models.Model):
         genre=None,
         disc_number=None,
     ):
+        # album identifiers are driven by the album artist primarily and only use artist
+        # as a fallback if album artist not set
         identifier_args = [
             album_name,
             album_artist_name or artist_name,

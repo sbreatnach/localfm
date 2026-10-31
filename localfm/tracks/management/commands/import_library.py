@@ -28,7 +28,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--parallel-workers",
             type=int,
-            default=2,
+            default=4,
             help="Number of parallel processes for importing",
         )
         parser.add_argument(
@@ -59,7 +59,7 @@ class Command(BaseCommand):
                 result
                 for result in executor.map(import_from_directory, base_directories)
             ]
-        logger.info(f"Imported tracks in %s seconds", time.time() - start_time)
+        logger.info("Imported tracks in %s seconds", time.time() - start_time)
 
 
 def is_filtered(name, name_filter=None):

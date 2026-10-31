@@ -1,0 +1,68 @@
+/* Layout */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Sidebar - Fixed to viewport, sized to text */
+aside.navigation {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 210px;
+  background: #1a1a2e;
+  padding: 18px 12px;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+
+aside.navigation nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+aside.navigation nav ul li {
+  margin: 6px 0;
+}
+
+aside.navigation nav ul li a {
+  color: #eee;
+  text-decoration: none;
+  padding: 9px 10px;
+  border-radius: 4px;
+  display: block;
+  transition: background 0.2s;
+}
+
+aside.navigation nav ul li a:hover {
+  background: #16213e;
+}
+
+/* Main content - Scrollable area, properly positioned */
+main.content {
+  margin-left: 210px;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 28px;
+  background: #f5f5f5;
+}
+
+/* Ensure content doesn't wrap awkwardly */
+section.tab-container,
+section[id="top-albums"],
+section[id="top-tracks"] {
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+/* Ensure sections fill available space */
+section.tab-container {
+  min-height: 100%;
+  margin-bottom: 30px;
+}
