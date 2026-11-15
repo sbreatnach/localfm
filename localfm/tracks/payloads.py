@@ -1,33 +1,33 @@
 from datetime import datetime
 from typing import Annotated, Optional
 
-from ninja import FilterLookup, FilterSchema, Schema
+from ninja import Field, FilterLookup, FilterSchema, Schema
 
 
 class ArtistSchema(Schema):
     name: str
-    artist_id: int
+    artist_id: int = Field(alias="id")
 
 
 class GenreSchema(Schema):
     name: str
-    genre_id: int
+    genre_id: int = Field(alias="id")
 
 
 class AlbumSchema(Schema):
-    album_id: int
+    album_id: int = Field(alias="id")
     name: str
-    artist_id: int
-    album_artist_id: int
-    genre_id: int
-    disc_number: int
+    artist_id: Optional[int] = None
+    album_artist_id: Optional[int] = None
+    genre_id: Optional[int] = None
+    disc_number: Optional[int] = None
 
 
 class TrackSchema(Schema):
-    track_id: int
-    artist_id: int
-    album_id: int
-    track_number: int
+    track_id: int = Field(alias="id")
+    artist_id: Optional[int] = None
+    album_id: Optional[int] = None
+    track_number: Optional[int] = None
     name: str
     play_count: int
 

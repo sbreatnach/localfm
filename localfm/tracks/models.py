@@ -87,7 +87,9 @@ class Album(models.Model):
         if not persisted_album:
             persisted_genre = None
             if tagged_data.genre:
-                persisted_genre = Genre.objects.get_or_create(name=tagged_data.genre.strip())[0]
+                persisted_genre = Genre.objects.get_or_create(
+                    name=tagged_data.genre.strip()
+                )[0]
             persisted_artist = None
             if tagged_data.artist:
                 persisted_artist = Artist.objects.get_or_create(

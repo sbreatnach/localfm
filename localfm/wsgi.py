@@ -22,8 +22,9 @@ logger = logging.getLogger(__name__)
 def run_wsgi_server(application, shutdown_token: CancellationToken, listen_address):
     logger.info("Starting WSGI service at %s", listen_address)
     server = create_server(application, listen=listen_address)
+    server_map = getattr(server, "_map", getattr(server, "map", None))
     try:
-        while server.map and not shutdown_token.is_canceled():
-            server.asyncore.poll(1.0, map=server.map)
+        while server_map and not shutdown_token.is_canceled():
+            server.asyncore.poll(1.0, map=server_map)
     finally:
         server.close()

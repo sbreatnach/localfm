@@ -24,3 +24,15 @@ generate-migrations *ARGS:
 lint:
     uv run isort .
     uv run ruff format .
+
+test-blackbox *ARGS:
+    uv run pytest tests/blackbox {{ARGS}}
+
+test-cluster-start:
+    uv run python -m tests.blackbox.cluster start
+
+test-cluster-stop:
+    uv run python -m tests.blackbox.cluster stop
+
+test-cluster-status:
+    uv run python -m tests.blackbox.cluster status

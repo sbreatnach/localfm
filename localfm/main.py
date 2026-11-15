@@ -3,9 +3,9 @@ import logging
 import threading
 import time
 
-from django.core.wsgi import get_wsgi_application
-from django.core import management
 import django
+from django.core import management
+from django.core.wsgi import get_wsgi_application
 
 logger = logging.getLogger("localfm.main")
 

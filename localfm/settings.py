@@ -93,12 +93,12 @@ DATABASES = {
         "NAME": environ.get("LOCALFM_DB_NAME", "localfm"),
         "USER": environ.get("LOCALFM_DB_USER", "localfm"),
         "PASSWORD": environ.get("LOCALFM_DB_PASSWORD", ""),
-    }
+    },
 }
 
 AUTHENTICATION_BACKENDS = [
-    "django.contrib.access.backends.ModelBackend",
-    "localfm.access.auth_backend.ApiKeyBackend",
+    "django.contrib.auth.backends.ModelBackend",
+    "localfm.access.auth_backend.ApiKeyAuthBackend",
 ]
 
 # Password validation
@@ -106,16 +106,16 @@ AUTHENTICATION_BACKENDS = [
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.access.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.access.password_validation.MinimumLengthValidator",
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.access.password_validation.CommonPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.access.password_validation.NumericPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 

@@ -4,6 +4,7 @@ from django.http import (
     HttpResponseForbidden,
     HttpResponseNotFound,
 )
+from django.views.decorators.csrf import csrf_exempt
 
 from localfm.access import views as sessions_views
 from localfm.tracks import views as tracks_views
@@ -21,6 +22,7 @@ def is_authenticated(request_data):
     return True
 
 
+@csrf_exempt
 def process(request):
     """
     Processes all Last.fm API requests. Authenticates using the expected format

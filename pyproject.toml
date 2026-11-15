@@ -19,6 +19,18 @@ dependencies = [
 [dependency-groups]
 dev = [
     "eyed3>=0.9.9",
+    "httpx>=0.28.0",
     "isort>=7.0.0",
+    "pydub>=0.25.1",
+    "pytest>=8.0.0",
+    "pytest-django>=4.8.0",
     "ruff>=0.14.7",
+]
+
+[tool.pytest]
+DJANGO_SETTINGS_MODULE = "localfm.settings"
+pythonpath = ["."]
+django_find_project = false
+markers = [
+    "blackbox: marks tests as blackbox tests",
 ]
