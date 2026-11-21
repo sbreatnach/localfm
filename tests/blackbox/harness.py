@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Optional
 
 from .client import BlackboxClient
-from .cluster import PostgresClusterConfig, PostgresClusterManager
-from .database import CleanDatabase
+from tests.shared.cluster import PostgresClusterConfig, PostgresClusterManager
+from tests.shared.database import CleanDatabase
 from .service import TestService, create_test_service
 
 logger = logging.getLogger("localfm.blackbox.harness")

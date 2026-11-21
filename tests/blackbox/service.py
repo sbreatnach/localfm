@@ -19,7 +19,7 @@ from typing import Optional
 
 import httpx
 
-from .database import CleanDatabase
+from tests.shared.database import CleanDatabase
 
 logger = logging.getLogger("localfm.blackbox.service")
 

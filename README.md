@@ -118,15 +118,3 @@ Auto-fix MP3/AAC metadata when import fails
   Just re-save the metadata
   Or fork the metadata lib to correctly read the older metadata format
   Or force a re-save of the entire music library
-
-# Prompts
-
-Please add integration tests that validate `localfm.tracks.library.import_file`. The tests should use the MP3
-fixture files in tests/fixtures and verify that they are imported as expected.
-Put these tests into a separate tests root module that mirrors the structure of the localfm package structure i.e.
-the test for this function would be located at `tests.localfm.tracks.test_library`.
-Use the pytest-django plugin to integrate with Django.
-
-Add a blackbox testing harness for the service.
-It will run a separate PostgreSQL DB and Django service dedicated to testing. It can use podman containers for this
-purpose. Each test run will have a clean test database and unique test service that is torn down on test completion.

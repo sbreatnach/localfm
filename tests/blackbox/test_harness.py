@@ -4,8 +4,8 @@ Tests validating the blackbox testing harness itself.
 
 import pytest
 
-from tests.blackbox.cluster import PostgresClusterManager
-from tests.blackbox.database import CleanDatabase
+from tests.shared.cluster import PostgresClusterManager
+from tests.shared.database import CleanDatabase
 from tests.blackbox.harness import BlackboxTestHarness
 
 

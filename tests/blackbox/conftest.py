@@ -7,19 +7,20 @@ from typing import Generator
 import pytest
 
 from .client import BlackboxClient
-from .cluster import PostgresClusterManager
+from tests.shared.cluster import PostgresClusterManager
 from .harness import BlackboxTestHarness
 
 
 @pytest.fixture(scope="session")
-def blackbox_cluster() -> Generator[PostgresClusterManager, None, None]:
+def blackbox_cluster(
+    shared_cluster: PostgresClusterManager,
+) -> PostgresClusterManager:
     """
     Session-scoped shared PostgreSQL DB cluster container managed by Podman.
-    Ensures the cluster container is running.
+    Reuses the shared cluster fixture so blackbox and integration tests share
+    one cluster container.
     """
-    cluster = PostgresClusterManager()
-    cluster.start_cluster()
-    yield cluster
+    return shared_cluster
 
 
 @pytest.fixture(scope="session")

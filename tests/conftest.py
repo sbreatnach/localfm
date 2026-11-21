@@ -9,6 +9,7 @@ from django.conf import settings
 
 pytest_plugins = [
     "tests.blackbox.conftest",
+    "tests.shared.fixtures",
 ]
 
 

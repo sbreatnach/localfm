@@ -5,7 +5,7 @@ Blackbox tests validating the LocalFM Ninja REST API endpoints.
 import pytest
 
 from tests.blackbox.client import BlackboxClient
-from tests.blackbox.cluster import PostgresClusterManager
+from tests.shared.cluster import PostgresClusterManager
 from tests.blackbox.harness import BlackboxTestHarness
 
 

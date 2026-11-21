@@ -1,10 +1,9 @@
 import hashlib
 import logging
-import os
 from pathlib import Path
 
 from django.conf import settings
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from tinytag import TinyTag
 
 logger = logging.getLogger(__name__)
@@ -84,31 +83,43 @@ class Album(models.Model):
             disc_number=tagged_data.disc,
         )
         persisted_album = cls.objects.filter(hashed_identifier=album_identifier).first()
-        if not persisted_album:
-            persisted_genre = None
-            if tagged_data.genre:
-                persisted_genre = Genre.objects.get_or_create(
-                    name=tagged_data.genre.strip()
-                )[0]
-            persisted_artist = None
-            if tagged_data.artist:
-                persisted_artist = Artist.objects.get_or_create(
-                    name=tagged_data.artist.strip()
-                )[0]
-            persisted_album_artist = None
-            if tagged_data.albumartist:
-                persisted_album_artist = Artist.objects.get_or_create(
-                    name=tagged_data.albumartist.strip()
-                )[0]
-            persisted_album = cls.objects.create(
-                name=tagged_data.album.strip(),
-                disc_number=tagged_data.disc,
-                artist=persisted_artist,
-                album_artist=persisted_album_artist,
-                genre=persisted_genre,
-                hashed_identifier=album_identifier,
-            )
-        return persisted_album
+        if persisted_album:
+            return persisted_album
+
+        try:
+            with transaction.atomic():
+                persisted_genre = None
+                if tagged_data.genre:
+                    persisted_genre = Genre.objects.get_or_create(
+                        name=tagged_data.genre.strip()
+                    )[0]
+                persisted_artist = None
+                if tagged_data.artist:
+                    persisted_artist = Artist.objects.get_or_create(
+                        name=tagged_data.artist.strip()
+                    )[0]
+                persisted_album_artist = None
+                if tagged_data.albumartist:
+                    persisted_album_artist = Artist.objects.get_or_create(
+                        name=tagged_data.albumartist.strip()
+                    )[0]
+                return cls.objects.create(
+                    name=tagged_data.album.strip(),
+                    disc_number=tagged_data.disc,
+                    artist=persisted_artist,
+                    album_artist=persisted_album_artist,
+                    genre=persisted_genre,
+                    hashed_identifier=album_identifier,
+                )
+        except IntegrityError:
+            # Another thread may have created the same album between our filter
+            # and create. If so, use the existing row instead of failing.
+            persisted_album = cls.objects.filter(
+                hashed_identifier=album_identifier
+            ).first()
+            if persisted_album is None:
+                raise
+            return persisted_album
 
     @classmethod
     def generate_identifier(

@@ -226,7 +226,7 @@ requires-dist = [
     { name = "psycopg", specifier = ">=3.3.1,<4" },
     { name = "pylast", specifier = ">=7.0.0,<8" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0,<4" },
-    { name = "tinytag", specifier = ">=2.1.2,<3" },
+    { name = "tinytag", specifier = ">=2.2.0,<3" },
     { name = "waitress", specifier = ">=3.0.2,<4" },
     { name = "watchdog", specifier = ">=6.0.0,<8" },
     { name = "whitenoise", specifier = ">=6.12.0" },
@@ -525,11 +525,11 @@ wheels = [
 
 [[package]]
 name = "tinytag"
-version = "2.1.2"
+version = "2.3.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f1/dc/a21d37263917e5e3aff95a70966c9be2bf550a792fc95008e2e444f0cd8c/tinytag-2.1.2.tar.gz", hash = "sha256:564e573e308d9fa78432493b4987fca1f84fb1f2ce29c586fc54629155e4fca0", size = 36639, upload-time = "2025-08-13T21:56:28.26Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/38/0f/fae085b7f19fe0c67b68e6d70098ac6cd046cc498f253f5ee56a3dd03bbc/tinytag-2.3.2.tar.gz", hash = "sha256:021d711cdbdbf840d3b67b976cb34dadc58d2fcfd490eb74ef9602b37b991414", size = 47353, upload-time = "2026-09-07T17:46:08.886Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/ca/37249dab162f3332223efade79272b40fd133b32b7abf51c6e86d55b3deb/tinytag-2.1.2-py3-none-any.whl", hash = "sha256:1a6b7b19c59ac4846b2446ec7a85cfaa17fbee6970592eaa5926702c261bad69", size = 31499, upload-time = "2025-08-13T21:56:26.722Z" },
+    { url = "https://files.pythonhosted.org/packages/6b/54/d378858d14e5c5c7b921cb9ffccf27be3d34f3d6d010c57404ddd634685d/tinytag-2.3.2-py3-none-any.whl", hash = "sha256:ebaf957915266b9c20414a10f8c5170a345aa039a794650d39d66e7d6b96199f", size = 37171, upload-time = "2026-09-07T17:46:07.434Z" },
 ]
 
 [[package]]

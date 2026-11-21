@@ -5,11 +5,11 @@ Blackbox testing harness for LocalFM service.
 
 def __getattr__(name: str):
     if name == "PostgresClusterManager":
-        from .cluster import PostgresClusterManager
+        from tests.shared.cluster import PostgresClusterManager
 
         return PostgresClusterManager
     if name == "CleanDatabase":
-        from .database import CleanDatabase
+        from tests.shared.database import CleanDatabase
 
         return CleanDatabase
     if name == "BlackboxClient":

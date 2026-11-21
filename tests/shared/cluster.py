@@ -14,7 +14,7 @@ from typing import Optional
 
 import psycopg
 
-logger = logging.getLogger("localfm.blackbox.cluster")
+logger = logging.getLogger("localfm.shared.cluster")
 
 
 @dataclass

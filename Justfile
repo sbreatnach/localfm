@@ -29,10 +29,10 @@ test-blackbox *ARGS:
     uv run pytest tests/blackbox {{ARGS}}
 
 test-cluster-start:
-    uv run python -m tests.blackbox.cluster start
+    uv run python -m tests.shared.cluster start
 
 test-cluster-stop:
-    uv run python -m tests.blackbox.cluster stop
+    uv run python -m tests.shared.cluster stop
 
 test-cluster-status:
-    uv run python -m tests.blackbox.cluster status
+    uv run python -m tests.shared.cluster status

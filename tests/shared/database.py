@@ -4,14 +4,13 @@ Clean test database manager for isolated test runs.
 
 import logging
 import uuid
-from dataclasses import dataclass
 from typing import Optional
 
 import psycopg
 
 from .cluster import PostgresClusterManager
 
-logger = logging.getLogger("localfm.blackbox.database")
+logger = logging.getLogger("localfm.shared.database")
 
 
 def generate_test_db_name() -> str:
