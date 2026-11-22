@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import unicodedata
 from pathlib import Path
 
 from django.conf import settings
@@ -16,10 +17,13 @@ def library_directory():
 def generate_identifier(*args):
     hasher = hashlib.md5(usedforsecurity=False)
     for arg in args:
-        # force all text to lower-case (if applicable to the language)
+        # Normalise Unicode so that composed and decomposed forms of the same
+        # text (e.g. "é" vs "e" + combining acute) produce the same identifier.
+        # Then force all text to lower-case (if applicable to the language)
         # since Last.fm has a weird way of not retaining capitalisation correctly;
         # also strip out any leading or trailing whitespace characters
-        hasher.update(str(arg).strip().lower().encode())
+        normalized = unicodedata.normalize("NFC", str(arg))
+        hasher.update(normalized.strip().lower().encode())
     return hasher.hexdigest()
 
 
