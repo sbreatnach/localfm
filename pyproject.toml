@@ -19,6 +19,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "eyed3>=0.9.9",
+    "factory-boy>=3.3.3",
     "httpx>=0.28.0",
     "isort>=7.0.0",
     "pydub>=0.25.1",

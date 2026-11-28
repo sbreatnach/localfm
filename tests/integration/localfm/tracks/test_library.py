@@ -12,6 +12,8 @@ from django.db import IntegrityError
 from localfm.tracks import library
 from localfm.tracks.models import Album, Artist, Genre, Track
 
+from tests.shared.factories import AlbumFactory, ArtistFactory, GenreFactory
+
 FIXTURES_DIR = Path(settings.BASE_DIR) / "tests" / "fixtures"
 
 
@@ -76,10 +78,10 @@ def test_album_get_or_create_recovers_from_concurrent_insert(migrated_db, monkey
         disc_number=tagged_data.disc,
     )
 
-    artist = Artist.objects.create(name=tagged_data.artist)
-    album_artist = Artist.objects.create(name=tagged_data.albumartist)
-    genre = Genre.objects.create(name=tagged_data.genre)
-    existing_album = Album.objects.create(
+    artist = ArtistFactory(name=tagged_data.artist)
+    album_artist = ArtistFactory(name=tagged_data.albumartist)
+    genre = GenreFactory(name=tagged_data.genre)
+    existing_album = AlbumFactory(
         name=tagged_data.album,
         artist=artist,
         album_artist=album_artist,

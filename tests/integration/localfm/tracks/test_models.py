@@ -2,41 +2,22 @@
 Integration tests for the top-albums report query.
 """
 
-from datetime import UTC, datetime, timedelta
+from localfm.tracks.models import Album
 
-from localfm.tracks.models import Album, Artist, Track, TrackPlay, generate_identifier
-
-
-def create_album(artist, album_artist=None, name="Test Album"):
-    return Album.objects.create(
-        name=name,
-        artist=artist,
-        album_artist=album_artist,
-        hashed_identifier=generate_identifier(name, album_artist, artist),
-    )
-
-
-def create_track(album, artist, name, play_count=0):
-    track = Track.objects.create(
-        name=name,
-        artist=artist,
-        album=album,
-        file_path=f"/tmp/{name}.mp3",
-        hashed_identifier=generate_identifier(name, artist.name, album.name),
-    )
-    start = datetime(2026, 1, 1, tzinfo=UTC)
-    TrackPlay.objects.bulk_create(
-        TrackPlay(track=track, occurred_on=start + timedelta(minutes=i))
-        for i in range(play_count)
-    )
-    return track
+from tests.shared.factories import (
+    AlbumFactory,
+    ArtistFactory,
+    TrackFactory,
+    TrackPlayFactory,
+)
 
 
 def test_list_with_play_count_includes_albums_without_album_artist(migrated_db):
     """Albums with no album-artist tag should still appear in the report."""
-    artist = Artist.objects.create(name="Fleetwood Mac")
-    album = create_album(artist, album_artist=None, name="Mystery To Me")
-    create_track(album, artist, "Hypnotized", play_count=2)
+    artist = ArtistFactory(name="Fleetwood Mac")
+    album = AlbumFactory(name="Mystery To Me", artist=artist, album_artist=None)
+    track = TrackFactory(album=album, artist=artist, name="Hypnotized")
+    TrackPlayFactory.create_batch(2, track=track)
 
     reported_albums = list(Album.list_with_play_count())
 
@@ -46,12 +27,15 @@ def test_list_with_play_count_includes_albums_without_album_artist(migrated_db):
 
 def test_list_with_play_count_prefers_album_artist_when_present(migrated_db):
     """The report should use the album artist for naming when it is set."""
-    track_artist = Artist.objects.create(name="Fleetwood Mac")
-    album_artist = Artist.objects.create(name="Various Artists")
-    album = create_album(
-        track_artist, album_artist=album_artist, name="Compilation Album"
+    track_artist = ArtistFactory(name="Fleetwood Mac")
+    album_artist = ArtistFactory(name="Various Artists")
+    album = AlbumFactory(
+        name="Compilation Album",
+        artist=track_artist,
+        album_artist=album_artist,
     )
-    create_track(album, track_artist, "Some Track", play_count=1)
+    track = TrackFactory(album=album, artist=track_artist, name="Some Track")
+    TrackPlayFactory(track=track)
 
     reported_albums = list(Album.list_with_play_count())
 
@@ -60,10 +44,14 @@ def test_list_with_play_count_prefers_album_artist_when_present(migrated_db):
 
 def test_list_with_play_count_uses_integer_average(migrated_db):
     """The average should retain the existing integer-division behaviour."""
-    artist = Artist.objects.create(name="Fleetwood Mac")
-    album = create_album(artist, album_artist=None, name="Kiln House")
-    create_track(album, artist, "Station Man", play_count=2)
-    create_track(album, artist, "Blood On The Floor", play_count=1)
+    artist = ArtistFactory(name="Fleetwood Mac")
+    album = AlbumFactory(name="Kiln House", artist=artist, album_artist=None)
+    station_man = TrackFactory(album=album, artist=artist, name="Station Man")
+    blood_on_the_floor = TrackFactory(
+        album=album, artist=artist, name="Blood On The Floor"
+    )
+    TrackPlayFactory.create_batch(2, track=station_man)
+    TrackPlayFactory(track=blood_on_the_floor)
 
     reported_album = list(Album.list_with_play_count())[0]
 
