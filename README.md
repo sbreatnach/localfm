@@ -57,10 +57,24 @@ just run-command import_library
 
 ## Import scrobbles
 
-All LastFM credentials need to be injected via env vars beforehand
+All LastFM credentials need to be injected via env vars beforehand.
+
+The final argument is always the target: `database` to import, or a file path/pattern
+to export the combined scrobbles. Earlier arguments are source files, glob patterns,
+or the single word `lastfm`.
 
 ```shell
-just run-command import_scrobbles
+# import one export
+just run-command import_scrobbles latest_scrobbles_20261128.json database
+
+# import multiple exports (quoted glob is expanded by the command)
+just run-command import_scrobbles 'latest_scrobbles_*.json' database
+
+# combine multiple exports into one file instead of importing them
+just run-command import_scrobbles latest_scrobbles_*.json combined_scrobbles.json
+
+# fetch directly from Last.fm
+just run-command import_scrobbles lastfm database
 ```
 
 ## Blackbox Testing

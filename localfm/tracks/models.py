@@ -27,6 +27,40 @@ def generate_identifier(*args):
     return hasher.hexdigest()
 
 
+def artist_name_variants(artist_name):
+    """
+    Return artist names that should be considered equivalent when resolving a
+    track. Last.fm and file tags disagree about leading "The " articles, so
+    allow one to be present on either side.
+
+    "The The" is left alone: stripping its leading article would produce
+    "The", which is a different (valid) artist name. For the same reason, an
+    artist called "The" is never expanded to "The The".
+    """
+    if not artist_name:
+        return [artist_name]
+
+    name = str(artist_name).strip()
+    if not name:
+        return [artist_name]
+
+    normalized_name = name.lower()
+    variants = [name]
+
+    if normalized_name.startswith("the "):
+        without_article = name[4:].strip()
+        starts_another_article = (
+            without_article.lower() == "the"
+            or without_article.lower().startswith("the ")
+        )
+        if without_article and not starts_another_article:
+            variants.append(without_article)
+    elif normalized_name != "the":
+        variants.append(f"The {name}")
+
+    return variants
+
+
 class Artist(models.Model):
     name = models.CharField(max_length=256, unique=True)
 
@@ -164,7 +198,46 @@ class Track(models.Model):
     def get_by_identifier(cls, track_name=None, **track_data):
         track_identifier = cls.generate_identifier(track_name, **track_data)
         logger.debug("Retrieving track with identifier %s", track_identifier)
-        return cls.objects.filter(hashed_identifier=track_identifier).first()
+        persisted_track = cls.objects.filter(hashed_identifier=track_identifier).first()
+        if persisted_track is not None:
+            return persisted_track
+
+        artist_name = track_data.get("artist_name")
+        fallback_identifiers = []
+        for variant in artist_name_variants(artist_name):
+            identifier = cls.generate_identifier(
+                track_name, **{**track_data, "artist_name": variant}
+            )
+            if (
+                identifier != track_identifier
+                and identifier not in fallback_identifiers
+            ):
+                fallback_identifiers.append(identifier)
+
+        if not fallback_identifiers:
+            return None
+
+        logger.debug(
+            "Retrieving track with fallback identifiers %s", fallback_identifiers
+        )
+        matches = list(
+            cls.objects.filter(hashed_identifier__in=fallback_identifiers)[:2]
+        )
+        if len(matches) == 1:
+            logger.info(
+                "Matched track %s for artist %r using an alternate artist name",
+                matches[0].id,
+                artist_name,
+            )
+            return matches[0]
+        if len(matches) > 1:
+            logger.warning(
+                "Ambiguous track match for %r / %r: %s",
+                track_name,
+                artist_name,
+                [match.id for match in matches],
+            )
+        return None
 
     @classmethod
     def get_or_create_by_tagged_data(cls, file_path: Path, tagged_data: TinyTag):

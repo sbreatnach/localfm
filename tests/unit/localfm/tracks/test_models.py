@@ -4,7 +4,7 @@ Unit tests for the track identifier generator.
 
 import unicodedata
 
-from localfm.tracks.models import generate_identifier
+from localfm.tracks.models import artist_name_variants, generate_identifier
 
 
 def test_generate_identifier_normalises_unicode():
@@ -46,3 +46,35 @@ def test_generate_identifier_matches_expected_hash():
         )
         == "10a49d0d7be3dfd7c55c0a646af61e54"
     )
+
+
+def test_artist_name_variants_removes_leading_article():
+    assert artist_name_variants("The Smashing Pumpkins") == [
+        "The Smashing Pumpkins",
+        "Smashing Pumpkins",
+    ]
+
+
+def test_artist_name_variants_adds_leading_article():
+    assert artist_name_variants("Smashing Pumpkins") == [
+        "Smashing Pumpkins",
+        "The Smashing Pumpkins",
+    ]
+
+
+def test_artist_name_variants_preserves_the_the():
+    """Stripping "The The" would produce the distinct name "The"."""
+    assert artist_name_variants("The The") == ["The The"]
+
+
+def test_artist_name_variants_does_not_prefix_the():
+    """Expanding "The" would produce the distinct name "The The"."""
+    assert artist_name_variants("The") == ["The"]
+
+
+def test_artist_name_variants_strips_only_one_article():
+    assert artist_name_variants("The The The") == ["The The The"]
+    assert artist_name_variants("The Themselves") == [
+        "The Themselves",
+        "Themselves",
+    ]

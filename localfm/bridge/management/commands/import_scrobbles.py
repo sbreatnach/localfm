@@ -1,3 +1,4 @@
+import glob
 import json
 import logging
 import os
@@ -10,7 +11,7 @@ from datetime import UTC, datetime, timedelta
 
 import pylast
 from dateutil.parser import parse as date_parse
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandError
 from django.db import transaction
 from pylast import PlayedTrack, User
 
@@ -96,6 +97,17 @@ def load_from_file(scrobbles_file, **kwargs) -> list[Scrobble]:
     return scrobbles
 
 
+def expand_scrobble_paths(patterns) -> list[str]:
+    """Expand glob patterns into a de-duplicated, ordered list of file paths."""
+    file_paths = []
+    for pattern in patterns:
+        matches = sorted(glob.glob(os.path.expanduser(pattern)))
+        if not matches:
+            raise CommandError(f"No scrobble files match {pattern!r}")
+        file_paths.extend(matches)
+    return list(dict.fromkeys(file_paths))
+
+
 def load_from_lastfm(
     lastfm_api_key=None,
     lastfm_api_secret=None,
@@ -174,12 +186,18 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "source",
-            help="source of the scrobbles to import",
+            nargs="+",
+            help=(
+                "source(s) of the scrobbles to import: file paths, glob patterns, "
+                "or 'lastfm'"
+            ),
         )
         parser.add_argument(
             "target",
-            default="database",
-            help="target where the scrobbles will be saved",
+            help=(
+                "target where the scrobbles will be saved: 'database' or an "
+                "output file pattern"
+            ),
         )
         parser.add_argument(
             "--log-level", default="INFO", help="Log level for the script"
@@ -227,17 +245,29 @@ class Command(BaseCommand):
     def handle(
         self,
         source,
+        target,
         failed_scrobbles_file="failed_scrobbles_{dated}.json",
-        target="database",
         log_level=logging.INFO,
         *args,
         **import_kwargs,
     ):
         logging.basicConfig(level=log_level)
-        if source == "lastfm":
+        if source == ["lastfm"]:
             scrobbles = load_from_lastfm(**import_kwargs)
+        elif "lastfm" in source:
+            raise CommandError(
+                "'lastfm' cannot be combined with scrobble files or glob patterns"
+            )
         else:
-            scrobbles = load_from_file(source, **import_kwargs)
+            scrobble_files = expand_scrobble_paths(source)
+            logger.info(
+                "Importing scrobbles from %d file(s): %s",
+                len(scrobble_files),
+                scrobble_files,
+            )
+            scrobbles = []
+            for scrobble_file in scrobble_files:
+                scrobbles.extend(load_from_file(scrobble_file, **import_kwargs))
 
         if target == "database":
             failed_scrobbles = []
