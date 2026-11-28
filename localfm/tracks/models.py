@@ -55,7 +55,8 @@ class Album(models.Model):
                (album_listens.total_album_listens /
                 album_totals.total_tracks) as approx_play_count
         FROM tracks_album albums
-        INNER JOIN tracks_artist artists ON artists.id = albums.album_artist_id
+        INNER JOIN tracks_artist artists
+                ON artists.id = COALESCE(albums.album_artist_id, albums.artist_id)
         INNER JOIN (
             SELECT albums.id as album_id, count(*) as total_tracks
             FROM tracks_track tracks
